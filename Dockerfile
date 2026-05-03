@@ -1,11 +1,11 @@
 FROM php:8.2-apache
 
-# Instalar extensiones necesarias
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     libzip-dev zip unzip git curl nodejs npm \
     && docker-php-ext-install zip
 
-# Instalar MongoDB extension
+# Instalar extensión MongoDB
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 
 # Instalar Composer
@@ -20,8 +20,13 @@ RUN a2enmod rewrite
 WORKDIR /var/www/html
 COPY . .
 
-# Instalar dependencias
-RUN composer install --no-dev --optimize-autoloader
+# Crear .env vacío para que composer no falle
+RUN cp .env.example .env
+
+# Instalar dependencias PHP
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Instalar dependencias JS y compilar
 RUN npm install && npm run build
 
 # Permisos
