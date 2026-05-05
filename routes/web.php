@@ -43,3 +43,12 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Cron job para actualizar noticias (protegido por clave secreta)
+Route::get('/fetch-news-secret', function() {
+    if (request('key') !== env('CRON_SECRET_KEY')) {
+        abort(403);
+    }
+    Artisan::call('bytepost:fetch-news');
+    return 'OK - ' . now();
+});
