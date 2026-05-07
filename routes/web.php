@@ -49,6 +49,11 @@ Route::get('/fetch-news-secret', function() {
     if (request('key') !== env('CRON_SECRET_KEY')) {
         abort(403);
     }
-    Artisan::call('bytepost:fetch-news');
-    return 'OK - ' . now();
+    // Solo una categoría por llamada para no agotar créditos
+    $categories = ['inteligencia-artificial', 'ciberseguridad', 'tecnologia', 'herramientas-dev', 'alertas-seguridad'];
+    $hour = now()->hour;
+    $category = $categories[$hour % 5];
+    
+    Artisan::call('bytepost:fetch-news', ['--category' => $category]);
+    return 'OK - ' . $category . ' - ' . now();
 });
